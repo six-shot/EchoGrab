@@ -100,15 +100,22 @@ document.getElementById("stopRecord").addEventListener("click", () => {
   }
 });
 
+async function getApiKey() {
+  const response = await fetch(chrome.runtime.getURL("config.json"));
+  const config = await response.json();
+  return config.GOOGLE_SPEECH_API_KEY;
+}
+
 async function transcribeAudio(audioBlob) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.readAsDataURL(audioBlob);
     reader.onloadend = async () => {
       try {
+        const apiKey = await getApiKey();
         console.log("Sending request to Google Speech API...");
         const response = await fetch(
-          `https://speech.googleapis.com/v1/speech:recognize?key=${config.API_KEY}`,
+          `https://speech.googleapis.com/v1/speech:recognize?key=${apiKey}`,
           {
             method: "POST",
             headers: {
