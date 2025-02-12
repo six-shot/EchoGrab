@@ -3,11 +3,17 @@ let audioChunks = [];
 
 document.getElementById("startRecord").addEventListener("click", async () => {
   try {
-    // Use chrome.tabCapture API instead of getUserMedia
     chrome.tabCapture.capture(
       {
         audio: true,
         video: false,
+        audioConstraints: {
+          mandatory: {
+            echoCancellation: false,
+            noiseSuppression: false,
+            autoGainControl: false,
+          },
+        },
       },
       (stream) => {
         if (!stream) {
@@ -15,7 +21,19 @@ document.getElementById("startRecord").addEventListener("click", async () => {
           return;
         }
 
-        mediaRecorder = new MediaRecorder(stream);
+        // Create an AudioContext to handle the audio stream
+        const audioContext = new AudioContext();
+        const source = audioContext.createMediaStreamSource(stream);
+        const destination = audioContext.createMediaStreamDestination();
+
+        // Connect the source to both the destination and audio context destination
+        source.connect(destination);
+        source.connect(audioContext.destination); // This allows you to hear the audio while recording
+
+        mediaRecorder = new MediaRecorder(destination.stream, {
+          mimeType: "audio/webm;codecs=opus",
+          audioBitsPerSecond: 128000,
+        });
 
         mediaRecorder.ondataavailable = (event) => {
           audioChunks.push(event.data);
@@ -32,9 +50,10 @@ document.getElementById("startRecord").addEventListener("click", async () => {
 
           audioChunks = [];
           stream.getTracks().forEach((track) => track.stop());
+          audioContext.close();
         };
 
-        mediaRecorder.start();
+        mediaRecorder.start(1000);
         document.getElementById("startRecord").disabled = true;
         document.getElementById("stopRecord").disabled = false;
       }
@@ -45,7 +64,9 @@ document.getElementById("startRecord").addEventListener("click", async () => {
 });
 
 document.getElementById("stopRecord").addEventListener("click", () => {
-  mediaRecorder.stop();
-  document.getElementById("startRecord").disabled = false;
-  document.getElementById("stopRecord").disabled = true;
+  if (mediaRecorder && mediaRecorder.state !== "inactive") {
+    mediaRecorder.stop();
+    document.getElementById("startRecord").disabled = false;
+    document.getElementById("stopRecord").disabled = true;
+  }
 });
