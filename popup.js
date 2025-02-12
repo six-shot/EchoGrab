@@ -108,7 +108,7 @@ async function transcribeAudio(audioBlob) {
       try {
         console.log("Sending request to Google Speech API...");
         const response = await fetch(
-          "https://speech.googleapis.com/v1/speech:recognize?key=AIzaSyCbD3fG02B62QqELkhgT5XqD6sQ9AczRQc",
+          `https://speech.googleapis.com/v1/speech:recognize?key=${config.API_KEY}`,
           {
             method: "POST",
             headers: {
