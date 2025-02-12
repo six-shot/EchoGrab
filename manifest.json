@@ -4,6 +4,7 @@
   "version": "1.0",
   "description": "Record audio from web pages",
   "permissions": ["activeTab", "downloads", "tabCapture"],
+  "host_permissions": ["*://*/*"],
   "action": {
     "default_popup": "popup.html"
   }
