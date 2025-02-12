@@ -1,5 +1,7 @@
 # Config files with sensitive data
 config.json
+*.config.json
+.env
 
 # Other common files to ignore
 .DS_Store
