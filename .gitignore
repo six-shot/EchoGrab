@@ -1,5 +1,5 @@
 # Config files with sensitive data
-config.js
+config.json
 
 # Other common files to ignore
 .DS_Store
